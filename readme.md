@@ -1,4 +1,4 @@
-Base PS5: getting past the first 3D scene (after first cutscene ends
+This is an experimental fork for base PS5: getting past the first 3D scene (after first cutscene ends
 Build: PS5_Hookshot ps5-v0.1.0-beta.2, PS5_Mesa 0f86253, base-class PS5 (12,016 MiB direct memory).
 
 Symptom:
@@ -6,20 +6,19 @@ GPU_FAULT_SUSPENDPOINT_TIMEOUT_IN_RUN_ASYNC on the first 3D frame after the intr
 
 Fix:
 In host/hos_main.c, after the PS5 defaults loop:
-setenv("RX_VK_FORCE_MESH_FALLBACK", "1", 1);
+setenv("RX_VK_FORCE_MESH_FALLBACK", "1", 1); (alternatively RX_VK_NO_MESH although visual fidelity is butchered completely)
 
 Task and mesh programs then run as compute shaders (Hookshot's existing no-mesh-shader path) instead of the driver's native mesh path. Result: about five minutes of play at 27–30 fps, no GPU fault.
-
-Also used in that run:
-setenv("HOS_DYNRES", "0", 1);   /* fixed resolution; HOS_RES_SCALE only applies with this */
-setenv("HOS_PS5_CPU", "1", 1);  /* memory and CPU line every 5 s */
 
 Why (likely)
 The driver describes every PS5 as the Pro's GPU class and reports mesh shaders. Upstream Mesa's model of the base GPU (gfx1013) has none. RX_VK_NO_MESH=1 also avoids the hang, so the native mesh path is the cause; the exact hardware reason is unproven.
 
 Still open
 Memory runs out at the next area load (about 0.4 GB free), causing dropped draws and stalls.
-<img width="2248" height="1262" alt="image" src="https://github.com/user-attachments/assets/bb631b25-89b1-4ad9-ab78-c6b6bd661c13" />
+<details>
+  <summary>Post cutscene in-game view (click):</summary>
+  <img width="2248" height="1262" alt="image" src="https://github.com/user-attachments/assets/bb631b25-89b1-4ad9-ab78-c6b6bd661c13" />
+</details>
 
 
 <h1 align="center">
