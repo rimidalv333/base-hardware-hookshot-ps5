@@ -1613,36 +1613,30 @@ int main(int argc, char **argv) {
 			{"HOS_RES_SCALE", "0.75"},
 			{"HOS_RES_LOG", "1"},
 			{"RX_VK_TEX_MAX_DIM", "256"},
-			
 			{"RX_VK_TEX_SKIP_MB", "16"},
-         {"RX_VK_ASTC_BC_MB", "0"}, {"RX_VK_FRAMEGEN_MULT", "2"}, {"RX_VK_PACE", "1"},
-         {"RX_VK_FSR_FG", "0"},
+			{"RX_VK_ASTC_BC_MB", "0"}, {"RX_VK_FRAMEGEN_MULT", "2"}, {"RX_VK_PACE", "1"},
+			{"RX_VK_FSR_FG", "0"},
 			{"RX_VK_ASTC_BC_ALL", "1"},
             /* (every shader translated before the first play, where hookshot_shaders.bin is beside the game, without the
                driver's part: with it the 4,128 compute programs alone went at ~1.3 a second, hours in all; without, ~26) */
-            {"RX_VK_NO_WARM", "1"},
+			{"RX_VK_NO_WARM", "1"},
             /* (the recordings' 48 descriptor pools at an eighth: 4 MiB of the driver's memory each as they come, 195 MiB in
                all, for the few programs past the push limit; one that runs out is followed by another) */
-            {"RX_VK_DESC_POOL_DIV", "16"},
+			{"RX_VK_DESC_POOL_DIV", "16"},
         };
         for (size_t i = 0; i < sizeof defaults / sizeof *defaults; i++) setenv(defaults[i][0], defaults[i][1], 0);
-		/* base PS5 profile (forced: these go over the defaults above and over hookshot_env.txt) */
-		/* 1. The GPU hang. The driver's native task/mesh path stalls the base console's GPU at the first 3D frame
-		      (RX_VK_NO_MESH=1 got past it, without the geometry). This keeps the geometry: task and mesh programs run as
-		      compute shaders and are drawn through an ordinary pipeline (gpu/vk/vk_main.cpp, the RX 5000 path).
-		      Expect "vk: no mesh shaders: task and mesh programs run as compute shaders" in the log, and the shaders to be
-		      prepared again once. Do not set RX_VK_NO_MESH with it. */
+		/*  base PS5 profile (forced: these go over the defaults above and over hookshot_env.txt) */
+		/* The GPU hang. The driver's native task/mesh path stalls the base console's GPU at the first 3D frame
+		(RX_VK_NO_MESH=1 got past it, without the geometry). This keeps the geometry: task and mesh programs run as
+		compute shaders and are drawn through an ordinary pipeline (gpu/vk/vk_main.cpp, the RX 5000 path).
+		Expect "vk: no mesh shaders: task and mesh programs run as compute shaders" in the log, and the shaders to be
+		prepared again once. Do not set RX_VK_NO_MESH with it. */
 		setenv("RX_VK_FORCE_MESH_FALLBACK", "1", 1);
-
-		/* 2. The 3D is drawn at about 1098×618. The log reads fixed 1 (scale 0.750) ... 1440 810, 3D scale 0.563. 
-            The game already applies its own 0.75 in this profile, HOS_RES_SCALE=0.75 multiplied on top of it */
 		setenv("HOS_OUTPUT_RES", "3", 1);
 		setenv("HOS_DYNRES", "0", 1);
 		setenv("HOS_RES_SCALE", "0.75", 1);
-
-		/* 3. A line every 5 s: CPU use, the game's pages, the heap, the console's direct memory and its largest free
-		      piece (host/ps5/win32_ps5.c). It is what tells a memory stall from a GPU one in the next log. Cheap. */
 		setenv("HOS_PS5_CPU", "1", 1);
+		setenv("RX_VK_VRAM_MB", "768", 1);
     }
     void hos_ps5_timing_probe(void);
     void hos_ps5_cpu_topology(void);
